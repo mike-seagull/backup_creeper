@@ -16,8 +16,7 @@ cache:
 before_script:
     - "apt-get update -qq && apt-get install -y -qq curl"
     - "pip install pipenv"
-    - "pipenv install"
-    - "pipenv shell"
+    - "pipenv install --system"
 
 run_tests:
     stage: test
