@@ -1,0 +1,34 @@
+image: python2.7-stretch
+
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+    
+stages:
+    - test
+    - bundle
+    - notify
+
+cache:
+  paths:
+    - .cache/
+
+
+before_script:
+    - "apt-get update -qq && apt-get install -y -qq curl"
+    - "pip install pipenv"
+    - "pipenv install"
+    - "pipenv shell"
+
+run_tests:
+    stage: test
+    script: "python test/test.py"
+
+notify_build_failure:
+  stage: notify
+  script: "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  when: on_failure
+
+notify_build_success:
+  stage: notify
+  script: "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  when: on_success
