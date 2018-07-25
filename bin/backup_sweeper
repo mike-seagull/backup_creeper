@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+BACKUP_DIR=$1
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd $DIR
+cd ..
+
+if [ "$1" == "install" ]; then
+	pipenv install
+else
+	pipenv run python src/backup_sweeper.py --backupdir "$BACKUP_DIR"
+fi
