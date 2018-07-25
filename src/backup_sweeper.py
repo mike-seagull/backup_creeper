@@ -6,13 +6,19 @@ import re
 from datetime import datetime, timedelta
 import argparse
 import logging
+import sys
 
-
+if getattr(sys, 'frozen', False):
+    # running in a bundle
+    repo_root = os.path.dirname(os.path.dirname(sys.executable))
+else:
+    # running live
+    repo_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # make logger
 log = logging.getLogger(__file__)   # create logger
 log.setLevel(logging.DEBUG)
 # create file handler
-fh = logging.FileHandler("logs/dbg.log")  # log to file
+fh = logging.FileHandler(os.path.join(repo_root, "logs", "dbg.log"))  # log to file
 ch = logging.StreamHandler()    # log to console
 # log debug messages
 fh.setLevel(logging.DEBUG)
@@ -185,9 +191,13 @@ def main(backup_dir):
 
 
 if __name__ == '__main__':
-    log.info("Starting")
     parser = argparse.ArgumentParser()
-    parser.add_argument('--backupdir', '-b', required=True)
+    parser.add_argument('--backupdir', '-b', help="full path to backup directory", required=True)
     args = parser.parse_args()
+    if not os.path.isabs(args.backupdir):
+        print("Backup directory is not a full path")
+        parser.print_help()
+        sys.exit(2)
+    log.info("Starting")
     main(args.backupdir)
     log.info("Done")

@@ -1,12 +1,12 @@
 image: python:2.7-stretch
 
 variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
     
 stages:
-    - test
-    - bundle
-    - notify
+  - test
+  - notify
+  - bundle
 
 cache:
   paths:
@@ -14,13 +14,17 @@ cache:
 
 
 before_script:
-    - "apt-get update -qq && apt-get install -y -qq curl"
-    - "pip install pipenv"
-    - "pipenv install --system"
+  - "apt-get update -qq && apt-get install -y -qq curl"
+  - "pip install pipenv"
+  - "pipenv install --dev --system"
 
 run_tests:
-    stage: test
-    script: "python test/test.py"
+  stage: test
+  script: "python test/test.py"
+
+build_binary:
+  stage: bundle
+  script: "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
 
 notify_build_failure:
   stage: notify
