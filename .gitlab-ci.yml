@@ -15,7 +15,7 @@ cache:
 
 before_script:
   - "apt-get update -qq && apt-get install -y -qq curl openvpn sshpass"
-  - "echo -e "${OPENVPN_CONFIG}"" > home.ovpn"
+  - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
   - "openvpn --config home.ovpn --daemon"
   - "pip install pipenv"
   - "pipenv install --dev --system"
