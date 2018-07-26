@@ -26,9 +26,15 @@ run_tests:
   stage: test
   script: "python test/test.py"
 
-build_binary:
-  stage: bundle
-  script: ""
+notify_build_failure:
+  stage: notify
+  script: "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  when: on_failure
+
+notify_build_success:
+  stage: notify
+  script: "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  when: on_success
 
 deploy_to_home_router:
   stage: deploy
@@ -44,14 +50,3 @@ deploy_to_home_router:
   when: on_success
   only: 
     - master
-
-
-notify_build_failure:
-  stage: notify
-  script: "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
-  when: on_failure
-
-notify_build_success:
-  stage: notify
-  script: "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
-  when: on_success
