@@ -6,7 +6,7 @@ variables:
 stages:
   - test
   - notify
-  - bundle
+  - deploy
 
 cache:
   paths:
@@ -14,9 +14,13 @@ cache:
 
 
 before_script:
-  - "apt-get update -qq && apt-get install -y -qq curl"
+  - "apt-get update -qq && apt-get install -y -qq curl openvpn sshpass"
+  - "echo ${OPENVPN_CONFIG} > home.ovpn"
+  - "openvpn --config home.ovpn --daemon"
   - "pip install pipenv"
   - "pipenv install --dev --system"
+  # test vpn connection
+  - "ping -c 4 10.10.10.1"
 
 run_tests:
   stage: test
@@ -24,7 +28,23 @@ run_tests:
 
 build_binary:
   stage: bundle
-  script: "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
+  script: ""
+
+deploy_to_home_router:
+  stage: deploy
+  environment:
+    name: "home.michaelhollister.me"
+    url: "http://home.michaelhollister.me"
+  script:
+    # build executable
+    - "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
+    - "sshpass -V"
+    # scp the binary
+    - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin"
+  when: on_success
+  only: 
+    - master
+
 
 notify_build_failure:
   stage: notify
