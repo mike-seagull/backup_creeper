@@ -1,52 +1,49 @@
 image: python:2.7-stretch
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
     
 stages:
   - test
   - notify
   - deploy
 
-cache:
-  paths:
-    - .cache/
-
-
-before_script:
-  - "apt-get update -qq && apt-get install -y -qq curl openvpn sshpass"
-  - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
-  - "openvpn --config home.ovpn --daemon"
-  - "pip install pipenv"
-  - "pipenv install --dev --system"
-  # test vpn connection
-  - "ping -c 4 10.10.10.1"
-
 run_tests:
   stage: test
-  script: "python test/test.py"
+  script:
+    - "apt-get update -qq && apt-get install -y -qq curl openvpn sshpass"
+    - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
+    - "pip install pipenv"
+    - "pipenv install --dev --system"
+    - "python test/test.py"
 
 notify_build_failure:
   stage: notify
-  script: "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  script:
+    - "apt-get update -qq && apt-get install -y -qq curl" 
+    - "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
   when: on_failure
 
 notify_build_success:
   stage: notify
-  script: "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+  script:
+    - "apt-get update -qq && apt-get install -y -qq curl" 
+    - "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
   when: on_success
 
 deploy_to_home_router:
   stage: deploy
+  tags:
+    - "opnsense"
   environment:
     name: "home.michaelhollister.me"
     url: "http://home.michaelhollister.me"
   script:
-    # build executable
-    - "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
-    - "sshpass -V"
+    # - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
+    # - "openvpn --config home.ovpn --daemon"  # connect vpn
+    # - "sleep 30"  # wait for connection
+    - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
+    - "pyinstaller --distpath bin --onefile src/backup_sweeper.py"  # build executable
     # scp the binary
     - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin"
+    # - "killall openvpn"  # kill vpn connection
   when: on_success
   only: 
     - master
