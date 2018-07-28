@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 import os
 import os.path
@@ -42,14 +42,6 @@ def get_backups(backup_dir):
     """
     log.debug("in get_backups")
     return os.listdir(backup_dir)
-
-
-'''
-def get_all_dates_from_list_of_backup_strings(regex, list_of_backups):
-    log.debug("get_all_dates_from_list_of_backup_strings")
-    pattern = re.compile(regex)
-    return [match.group(0) for backup in list_of_backups for match in [pattern.search(backup)] if match]
-'''
 
 
 def get_all_dates_from_list_of_backup_strings(regex, list_of_backups, backup_dir="./"):
@@ -179,19 +171,22 @@ def main(backup_dir):
     log.info("about to get the list of all backups as strings")
     backup_info = get_all_dates_from_list_of_backup_strings(r'\d{4}-\d{2}-\d{2}', backups, backup_dir)
     log.debug("backup dates and paths are: %s" % str(backup_info))
-    log.info("about to convert all datestrings to datetimes")
-    all_backup_dates = convert_all_datestrings_in_list_to_datetime(backup_info.keys())
-    log.debug("all_backup_dates_are: %s" % str(all_backup_dates))
-    log.info("about to find all backups to keep")
-    datetimes_to_keep = find_backups_to_keep(all_backup_dates)
-    log.debug("datetimes_to_keep are: %s" % str(datetimes_to_keep))
-    log.info("about to get the datetimes to remove")
-    datetimes_to_remove = get_dates_to_remove_from_dates_to_keep(datetimes_to_keep, all_backup_dates)
-    log.debug("datetimes_to_remove are: %s" % str(datetimes_to_remove))
-    log.info("about to convert all datetimes to remove to datestrings")
-    date_strings_to_remove = convert_all_datetimes_to_strings(datetimes_to_remove)
-    log.debug("date_strings_to_remove are: %s" % str(date_strings_to_remove))
-    delete_backups(date_strings_to_remove, backup_info)
+    if len(backup_info.keys()) > 1:
+        log.info("about to convert all datestrings to datetimes")
+        all_backup_dates = convert_all_datestrings_in_list_to_datetime(backup_info.keys())
+        log.debug("all_backup_dates_are: %s" % str(all_backup_dates))
+        log.info("about to find all backups to keep")
+        datetimes_to_keep = find_backups_to_keep(all_backup_dates)
+        log.debug("datetimes_to_keep are: %s" % str(datetimes_to_keep))
+        log.info("about to get the datetimes to remove")
+        datetimes_to_remove = get_dates_to_remove_from_dates_to_keep(datetimes_to_keep, all_backup_dates)
+        log.debug("datetimes_to_remove are: %s" % str(datetimes_to_remove))
+        log.info("about to convert all datetimes to remove to datestrings")
+        date_strings_to_remove = convert_all_datetimes_to_strings(datetimes_to_remove)
+        log.debug("date_strings_to_remove are: %s" % str(date_strings_to_remove))
+        delete_backups(date_strings_to_remove, backup_info)
+    else:
+        log.warning("There is less than one backup")
 
 
 if __name__ == '__main__':
