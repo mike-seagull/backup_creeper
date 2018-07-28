@@ -34,7 +34,7 @@ deploy_mediaserver:
     name: "home.michaelhollister.me"
     url: "http://home.michaelhollister.me"
   script:
-    - "apt-get update -qq && apt-get install -y -qq openvpn sshpass"
+    - "apt-get update -qq && apt-get install -y -qq openvpn sshpass psmisc"
     - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
     - "openvpn --config home.ovpn --daemon"  # connect vpn
     - "sleep 30"  # wait for connection
