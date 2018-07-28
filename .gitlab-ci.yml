@@ -30,8 +30,6 @@ notify_build_success:
 
 deploy_to_home_router:
   stage: deploy
-  tags:
-    - "opnsense"
   environment:
     name: "home.michaelhollister.me"
     url: "http://home.michaelhollister.me"
