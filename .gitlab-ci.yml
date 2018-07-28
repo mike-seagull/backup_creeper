@@ -28,13 +28,13 @@ notify_build_success:
     - "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
   when: on_success
 
-deploy_to_home_router:
+deploy_mediaserver:
   stage: deploy
   environment:
     name: "home.michaelhollister.me"
     url: "http://home.michaelhollister.me"
   script:
-    - "apt-get update -qq && apt-get install -y -qq openvpn"
+    - "apt-get update -qq && apt-get install -y -qq openvpn sshpass"
     - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
     - "openvpn --config home.ovpn --daemon"  # connect vpn
     - "sleep 30"  # wait for connection
