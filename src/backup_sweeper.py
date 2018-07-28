@@ -10,26 +10,30 @@ import sys
 
 if getattr(sys, 'frozen', False):
     # running in a bundle
-    repo_root = os.path.dirname(os.path.dirname(sys.executable))
+    log_file = os.path.join("/var/log", "%s.log" % sys.executable)
 else:
     # running live
     repo_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    log_file = os.path.join(repo_root, "logs", "%s.log" % __file__)
+formatter = logging.Formatter('[%(asctime)s] - %(filename)s - %(levelname)s: %(message)s')
 # make logger
 log = logging.getLogger(__file__)   # create logger
 log.setLevel(logging.DEBUG)
-# create file handler
-fh = logging.FileHandler(os.path.join(repo_root, "logs", "dbg.log"))  # log to file
 ch = logging.StreamHandler()    # log to console
 # log debug messages
-fh.setLevel(logging.DEBUG)
 ch.setLevel(logging.INFO)
 # create formatter and add it to the handler
-formatter = logging.Formatter('[%(asctime)s] - %(filename)s - %(levelname)s: %(message)s')
 ch.setFormatter(formatter)
-fh.setFormatter(formatter)
 # add the handlers to the logger
-log.addHandler(fh)
 log.addHandler(ch)
+try:
+    # create file handler
+    fh = logging.FileHandler(log_file)  # log to file
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+except IOError:
+    log.error("Failed to create log file handler. Check permissions for: %s" % log_file)
 
 
 def get_backups(backup_dir):
