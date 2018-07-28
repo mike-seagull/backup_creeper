@@ -164,6 +164,7 @@ def delete_backups(date_strings_to_remove, backup_info):
 
 def main(backup_dir):
     log.debug("in main")
+    log.info("writing logs to file: %s" % log_file)
     log.info("backup_dir = %s" % backup_dir)
     log.info("about to get backups")
     backups = get_backups(backup_dir)
