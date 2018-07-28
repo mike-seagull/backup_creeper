@@ -34,7 +34,7 @@ deploy_to_home_router:
     name: "home.michaelhollister.me"
     url: "http://home.michaelhollister.me"
   script:
-    - "apt-get update -qq && apt-get install openvpn"
+    - "apt-get update -qq && apt-get install -y -qq openvpn"
     - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
     - "openvpn --config home.ovpn --daemon"  # connect vpn
     - "sleep 30"  # wait for connection
