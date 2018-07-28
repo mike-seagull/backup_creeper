@@ -41,7 +41,7 @@ deploy_to_home_router:
     - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
     - "pyinstaller --distpath bin --onefile src/backup_sweeper.py"  # build executable
     # scp the binary
-    - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin"
+    - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/home/michaelhollister/.bin/"
     - "killall openvpn"  # kill vpn connection
   when: on_success
   only: 
