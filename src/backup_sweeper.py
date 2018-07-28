@@ -10,7 +10,7 @@ import sys
 
 if getattr(sys, 'frozen', False):
     # running in a bundle
-    log_file = os.path.join("/var/log", "%s.log" % sys.executable)
+    log_file = os.path.join("/var/log", "%s.log" % os.path.basename(sys.executable))
 else:
     # running live
     repo_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
