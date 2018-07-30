@@ -5,14 +5,12 @@ stages:
   - notify
   - deploy
 
-before_script:
-  - "pip install pipenv"
-  - "pipenv install --dev --system"
-
 run_tests:
   stage: test
   script:
-    - "python test/test.py"
+  - "pip install pipenv"
+  - "pipenv install --dev --system"
+  - "python test/test.py"
 
 notify_build_failure:
   stage: notify
@@ -38,10 +36,13 @@ deploy_mediaserver:
     - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
     - "openvpn --config home.ovpn --daemon"  # connect vpn
     - "sleep 30"  # wait for connection
+    - "pip install pipenv"
+    - "pipenv install --dev --system"
     - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
     - "pyinstaller --distpath bin --onefile src/backup_sweeper.py"  # build executable
     # scp the binary
-    - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/home/michaelhollister/.bin/"
+    - "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper"
+    - "sshpass -p \"$REMOTE_PASSWORD\" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/backup_sweeper"
     - "killall openvpn"  # kill vpn connection
   when: on_success
   only: 
