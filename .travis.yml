@@ -1,11 +1,19 @@
 language: python
-python:
-  - "2.7"
+
+sudo: required
+
+services:
+  - docker
+
+env: SH="docker exec -t backup_sweeper bash -c"
 
 before_install:
-  - "pip install pipenv"
+  - "docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-jessie \"tail -f /dev/null\""
+  - "docker ps"
 
 install:
-  - "pipenv install --dev --system"
+  - "$SH \"pip install pipenv\""
+  - "$SH \"pipenv install --dev --system\""
 
-script: "python test/test.py"
+script:
+  - $SH "python test/test.py"
