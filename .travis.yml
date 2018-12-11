@@ -8,8 +8,12 @@ services:
 env: SH="docker exec -t backup_sweeper bash -c"
 
 before_install:
+  - "sudo apt-get install -y -qq curl"
   - "docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-jessie tail -f /dev/null"
   - "docker ps"
+addons:
+  apt:
+    update: true
 
 install:
   - "$SH \"pip install pipenv\""
@@ -17,3 +21,9 @@ install:
 
 script:
   - $SH "python test/test.py"
+
+after_failure:
+  - "curl -X POST -d 'message=\"backup_sweeper build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
+
+after_success:
+  - "curl -X POST -d 'message=\"backup_sweeper build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
