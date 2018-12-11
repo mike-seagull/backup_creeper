@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mike-seagull/backup_sweeper.svg?branch=master)](https://travis-ci.org/mike-seagull/backup_sweeper)  
+[![Build Status](https://travis-ci.com/mike-seagull/bash-logging.svg?branch=master)](https://travis-ci.com/mike-seagull/bash-logging)  
 Sweeps daily backups of [OPNsense](https://opnsense.org/) config files
 <h4>It only keeps 2 weeks of daily backups, 3 monthly backups, and 1 annual backup by default</h4>
 <code>python src/backup_sweeper.py --backupdir ${FULLPATH_TO_BACKUP_DIRECTORY}</code>
