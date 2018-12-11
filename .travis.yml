@@ -6,8 +6,7 @@ services:
   - docker
 
 env:
-  - PROJECT_NAME="backup_sweeper"
-  - SH="docker exec -t ${PROJECT_NAME} bash -c"
+  - PROJECT_NAME="backup_sweeper" SH="docker exec -t ${PROJECT_NAME} bash -c"
 
 before_install:
   - "sudo apt-get install -y -qq curl"
