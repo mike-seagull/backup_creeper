@@ -9,12 +9,13 @@ env:
   - PROJECT_NAME="backup_sweeper" SH="docker exec -t ${PROJECT_NAME} bash -c"
 
 before_install:
-  - "sudo apt-get install -y -qq curl"
   - "docker run --detach --name ${PROJECT_NAME} -v $(pwd):/travis -w /travis python:2.7-slim-stretch tail -f /dev/null"
   - "docker ps"
 addons:
   apt:
     update: true
+    packages:
+      - curl
 
 install:
   - "$SH \"pip install pipenv\""
@@ -39,6 +40,13 @@ before_deploy:
   - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
   # build executable
   - "$SH \"pyinstaller --distpath bin --onefile src/${PROJECT_NAME}.py\""
+addons:
+  apt:
+    update: true
+    packages:
+      - openvpn
+      - sshpass
+      - psmisc
 
 deploy:
   provider: script
