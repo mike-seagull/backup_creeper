@@ -8,7 +8,7 @@ services:
 env: SH="docker exec -t backup_sweeper bash -c"
 
 before_install:
-  - "docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-jessie \"tail -f /dev/null\""
+  - "docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-jessie tail -f /dev/null"
   - "docker ps"
 
 install:
