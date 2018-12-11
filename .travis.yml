@@ -33,6 +33,7 @@ before_deploy:
   # start vpn
   - "sudo apt-get install -y -qq openvpn sshpass psmisc"
   - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
+  - "echo -e \"${OPENVPN_CONFIG}\""
   - "openvpn --config home.ovpn --daemon"  # connect vpn
   - "sleep 30"  # wait for connection
   - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
