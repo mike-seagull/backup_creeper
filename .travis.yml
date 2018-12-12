@@ -29,11 +29,11 @@ after_success:
 before_deploy:
 - openvpn --config deploy.ovpn --daemon
 - sleep 30
-- $SH "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
+- $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
   provider: script
   script: sshpass -p "$REMOTE_PASSWORD" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-    ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper
+    $(pwd)/bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper
     && sshpass -p "$REMOTE_PASSWORD" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
     ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/backup_sweeper
   on:
