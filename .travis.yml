@@ -36,7 +36,7 @@ before_deploy:
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
   provider: script
-  script: bash .travis/deploy.sh
+  script: bash .travis/deploy.sh $(pwd)
   on:
     branch: master
 after_deploy:
