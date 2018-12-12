@@ -6,7 +6,8 @@ env:
 - SH="docker exec -t backup_sweeper bash -c"
 before_install:
 - openssl aes-256-cbc -K $encrypted_d7fe4871d4a5_key -iv $encrypted_d7fe4871d4a5_iv
-  -in .travis/deploy.ovpn.enc -out deploy.ovpn -d
+  -in secrets.tar.enc -out secrets.tar -d
+- tar xvf secrets.tar
 - docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-slim-stretch
   tail -f /dev/null
 - docker ps
@@ -14,9 +15,10 @@ addons:
   apt:
     update: true
     packages:
-    - openvpn
-    - sshpass
-    - psmisc
+    - openvpn # need for deployment
+    - psmisc  # need for killall
+  on:
+    branch: master
 install:
 - $SH "pip install pipenv"
 - $SH "pipenv install --dev --system"
@@ -27,16 +29,18 @@ after_failure:
 after_success:
 - curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
-- $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
+- $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev
+  python-setuptools build-essential"
 - openvpn --config deploy.ovpn --daemon
 - sleep 30
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
   provider: script
-  script: sshpass -p "$REMOTE_PASSWORD" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-    $(pwd)/bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper
-    && sshpass -p "$REMOTE_PASSWORD" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-    ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/backup_sweeper
+  script:
+  - mv id_rsa ~/.ssh/
+  - sudo chmod 600 ~/.ssh/id_rsa 
+  - scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $(pwd)/bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper
+  - ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/backup_sweeper
   on:
     branch: master
 after_deploy:
