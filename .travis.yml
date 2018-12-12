@@ -1,60 +1,43 @@
 language: python
-
 sudo: required
-
 services:
-  - docker
-
+- docker
 env:
-  - PROJECT_NAME="backup_sweeper" SH="docker exec -t ${PROJECT_NAME} bash -c"
-
+- SH="docker exec -t backup_sweeper bash -c"
 before_install:
-  - "docker run --detach --name ${PROJECT_NAME} -v $(pwd):/travis -w /travis python:2.7-slim-stretch tail -f /dev/null"
-  - "docker ps"
+- openssl aes-256-cbc -K $encrypted_d7fe4871d4a5_key -iv $encrypted_d7fe4871d4a5_iv
+  -in .travis/deploy.ovpn.enc -out .travis/deploy.ovpn -d
+- docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-slim-stretch
+  tail -f /dev/null
+- docker ps
 addons:
   apt:
     update: true
     packages:
-      - curl
-
+    - openvpn
+    - sshpass
+    - psmisc
 install:
-  - "$SH \"pip install pipenv\""
-  - "$SH \"pipenv install --dev --system\""
-
+- $SH "pip install pipenv"
+- $SH "pipenv install --dev --system"
 script:
-  - $SH "python test/test.py"
-
+- $SH "python test/test.py"
 after_failure:
-  - "curl -X POST -d 'message=\"${PROJECT_NAME} build failed\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
-
+- curl -X POST -d 'message="backup_sweeper build failed"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 after_success:
-  - "curl -X POST -d 'message=\"${PROJECT_NAME} build successful\"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover"
-
+- curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
-  # start vpn
-  - "sudo apt-get install -y -qq openvpn sshpass psmisc"
-  - "echo -e \"${OPENVPN_CONFIG}\" > home.ovpn"
-  - "echo -e \"${OPENVPN_CONFIG}\""
-  - "openvpn --config home.ovpn --daemon"  # connect vpn
-  - "sleep 30"  # wait for connection
-  - "ping -c 4 ${REMOTE_SERVER}"  # test vpn connection
-  # build executable
-  - "$SH \"pyinstaller --distpath bin --onefile src/${PROJECT_NAME}.py\""
-addons:
-  apt:
-    update: true
-    packages:
-      - openvpn
-      - sshpass
-      - psmisc
-
+- openvpn --config .travis/deploy.ovpn --daemon
+- sleep 30
+- ping -c 4 ${REMOTE_SERVER}
+- $SH "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
 deploy:
   provider: script
-  # scp binary
-  script: "sshpass -p \"$REMOTE_PASSWORD\" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ./bin/${PROJECT_NAME} ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/${PROJECT_NAME} && sshpass -p \"$REMOTE_PASSWORD\" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/${PROJECT_NAME}"
+  script: sshpass -p "$REMOTE_PASSWORD" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    ./bin/backup_sweeper ${REMOTE_USER}@${REMOTE_SERVER}:/usr/local/bin/backup_sweeper
+    && sshpass -p "$REMOTE_PASSWORD" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    ${REMOTE_USER}@${REMOTE_SERVER} /bin/chmod +x /usr/local/bin/backup_sweeper
   on:
     branch: master
-
 after_deploy:
-  # kill vpn connection
-  - "killall openvpn"
+- killall openvpn
