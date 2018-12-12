@@ -6,4 +6,4 @@ dist/
 *.spec
 bin/*
 !bin/.gitkeep
-.travis/deploy.ovpn
+.travis/secrets.tar
