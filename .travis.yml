@@ -29,7 +29,9 @@ after_success:
 before_deploy:
 - ls
 - cat deploy.ovpn
-- openvpn --config deploy.ovpn --daemon
+- openvpn --version
+- sudo openvpn --version
+- sudo openvpn --config deploy.ovpn --daemon
 - sleep 30
 - ping -c 4 ${REMOTE_SERVER}
 - $SH "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
