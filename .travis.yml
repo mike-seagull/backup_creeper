@@ -27,9 +27,8 @@ after_failure:
 after_success:
 - curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
-- sudo openvpn --config deploy.ovpn --daemon || true
+- openvpn --config deploy.ovpn --daemon
 - sleep 30
-- ping -c 4 home.michaelhollister.me
 - $SH "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
 deploy:
   provider: script
