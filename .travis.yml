@@ -6,7 +6,7 @@ env:
 - SH="docker exec -t backup_sweeper bash -c"
 before_install:
 - openssl aes-256-cbc -K $encrypted_d7fe4871d4a5_key -iv $encrypted_d7fe4871d4a5_iv
-  -in .travis/deploy.ovpn.enc -out .travis/deploy.ovpn -d
+  -in .travis/deploy.ovpn.enc -out deploy.ovpn -d
 - docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-slim-stretch
   tail -f /dev/null
 - docker ps
@@ -28,7 +28,7 @@ after_success:
 - curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
 - ifconfig -a
-- openvpn --config .travis/deploy.ovpn &
+- openvpn --config deploy.ovpn &
 - sleep 30
 - $SH "pyinstaller --distpath bin --onefile src/backup_sweeper.py"
 deploy:
