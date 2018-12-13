@@ -26,14 +26,17 @@ after_failure:
 after_success:
 - curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
+- $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
 - openssl aes-256-cbc -K $encrypted_d7fe4871d4a5_key -iv $encrypted_d7fe4871d4a5_iv -in .travis/secrets.tar.enc -out secrets.tar -d
 - tar xvf secrets.tar
-- mv id_rsa ~/.ssh/
-- sudo chmod 600 ~/.ssh/id_rsa
-- $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
+# setup ssh
 - sudo openvpn deploy.ovpn &
 - sleep 30
 - ping -c 4 $REMOTE_SERVER
+- mv id_rsa ~/.ssh/
+- sudo chmod 600 ~/.ssh/id_rsa
+- ssh-keyscan -H $REMOTE_SERVER > ~/.ssh/known_hosts
+# build binary
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
   skip_cleanup: true
