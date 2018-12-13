@@ -35,6 +35,7 @@ before_deploy:
 - sleep 30
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash .travis/deploy.sh
   on:
