@@ -33,6 +33,7 @@ before_deploy:
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
 - openvpn --config deploy.ovpn --daemon
 - sleep 30
+- ping -c 4 $REMOTE_SERVER
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
 deploy:
   skip_cleanup: true
