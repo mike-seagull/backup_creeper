@@ -31,7 +31,7 @@ before_deploy:
 - mv id_rsa ~/.ssh/
 - sudo chmod 600 ~/.ssh/id_rsa
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
-- openvpn --config deploy.ovpn --daemon
+- sudo openvpn deploy.ovpn &
 - sleep 30
 - ping -c 4 $REMOTE_SERVER
 - $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
@@ -42,4 +42,4 @@ deploy:
   on:
     branch: master
 after_deploy:
-- killall openvpn
+- sudo killall openvpn
