@@ -3,9 +3,9 @@ sudo: required
 services:
 - docker
 env:
-- SH="docker exec -t backup_sweeper bash -c"
+- SH="docker exec -t backup_creeper bash -c"
 before_install:
-- docker run --detach --name backup_sweeper -v $(pwd):/travis -w /travis python:2.7-slim-stretch
+- docker run --detach --name backup_creeper -v $(pwd):/travis -w /travis python:3.7-slim-stretch
   tail -f /dev/null
 - docker ps
 addons:
@@ -22,12 +22,12 @@ install:
 script:
 - $SH "python test/test.py"
 after_failure:
-- curl -X POST -d 'message="backup_sweeper build failed"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
+- curl -X POST -d 'message="backup_creeper build failed"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 after_success:
-- curl -X POST -d 'message="backup_sweeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
+- curl -X POST -d 'message="backup_creeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
 before_deploy:
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
-- openssl aes-256-cbc -K $encrypted_d7fe4871d4a5_key -iv $encrypted_d7fe4871d4a5_iv -in .travis/secrets.tar.enc -out secrets.tar -d
+- openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in .travis/secrets.enc -out secrets.tar -d
 - tar xvf secrets.tar
 # setup ssh
 - sudo openvpn deploy.ovpn &
@@ -37,7 +37,7 @@ before_deploy:
 - sudo chmod 600 ~/.ssh/id_rsa
 - ssh-keyscan -H $REMOTE_SERVER > ~/.ssh/known_hosts
 # build binary
-- $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_sweeper.py"
+- $SH "pyinstaller --distpath /travis/bin/ --onefile /travis/src/backup_creeper.py"
 deploy:
   skip_cleanup: true
   provider: script
