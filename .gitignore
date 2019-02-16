@@ -1,4 +1,6 @@
 logs/*.log
+*.log
+src/__pycache__
 test/*
 !test/*.py
 build/

@@ -3,7 +3,7 @@ from datetime import datetime
 import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "src"))
-from backup_sweeper import *
+from backup_creeper import *
 
 
 class TestBackupsToKeep(unittest.TestCase):
