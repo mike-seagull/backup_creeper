@@ -22,9 +22,9 @@ install:
 script:
 - $SH "python test/test.py"
 after_failure:
-- curl -X POST -d 'message="backup_creeper build failed"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
+- curl -X POST -d 'message="backup_creeper build failed"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@${HOME_API_SERVER}/api/pushover
 after_success:
-- curl -X POST -d 'message="backup_creeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@michaelhollister.me/api/pushover
+- curl -X POST -d 'message="backup_creeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@${HOME_API_SERVER}/api/pushover
 before_deploy:
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
 - openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in .travis/secrets.enc -out secrets.tar -d
