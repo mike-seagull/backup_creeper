@@ -30,7 +30,7 @@ before_deploy:
 - openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in .travis/secrets.enc -out secrets.tar -d
 - tar xvf secrets.tar
 # setup ssh
-- sudo openvpn deploy.ovpn &
+- nohup sudo openvpn deploy.ovpn > /dev/null 2>&1 &
 - sleep 30
 - ping -c 4 $REMOTE_SERVER
 - mv id_rsa ~/.ssh/
@@ -45,4 +45,4 @@ deploy:
   on:
     branch: master
 after_deploy:
-- sudo killall openvpn
+- sudo killall openvpn || sudo killall nohup
