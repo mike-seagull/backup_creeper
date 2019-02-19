@@ -14,6 +14,7 @@ addons:
     packages:
     - openvpn # need for deployment
     - psmisc  # need for killall
+    - unzip
   on:
     branch: master
 install:
@@ -27,7 +28,9 @@ after_success:
 - curl -X POST -d 'message="backup_creeper build successful"' https://${HOME_API_USER}:${HOME_API_AUTHKEY}@${HOME_API_SERVER}/api/pushover
 before_deploy:
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
-- openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in .travis/secrets.enc -out secrets.tar -d
+- curl -L -o deploy.zip https://www.dropbox.com/sh/3mtqfx6igt0acaf/AABeOsWSU0rd7glJe9ZIitdma?dl=0
+- unzip deploy.zip
+- openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in secrets.enc -out secrets.tar -d
 - tar xvf secrets.tar
 # setup ssh
 - nohup sudo openvpn deploy.ovpn > /dev/null 2>&1 &
@@ -41,7 +44,7 @@ before_deploy:
 deploy:
   skip_cleanup: true
   provider: script
-  script: bash .travis/deploy.sh
+  script: bash deploy.sh
   on:
     branch: master
 after_deploy:
