@@ -29,7 +29,7 @@ after_success:
 before_deploy:
 - $SH "apt-get update -qy && apt-get install --no-install-recommends -qfy python-dev python-setuptools build-essential"
 - curl -L -o deploy.zip https://www.dropbox.com/sh/3mtqfx6igt0acaf/AABeOsWSU0rd7glJe9ZIitdma?dl=0
-- unzip deploy.zip
+- unzip deploy.zip -x / # command fails without the exlude
 - openssl aes-256-cbc -K "${SSL_KEY}" -iv "${SSL_IV}" -in secrets.enc -out secrets.tar -d
 - tar xvf secrets.tar
 # setup ssh
